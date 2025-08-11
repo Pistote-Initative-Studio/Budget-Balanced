@@ -1,14 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 
 import '../../data/models/transaction.dart';
 import '../../data/repos/transaction_repo.dart';
-import '../../data/repos/budget_repo.dart';
-import '../../data/repos/goal_repo.dart';
+import '../../data/storage/hive_boxes.dart';
 
-final transactionsProvider = StreamProvider<List<Transaction>>((ref) {
+final hiveReadyProvider = FutureProvider<void>((ref) async {
+  await initHive();
+});
+
+final transactionRepoProvider = Provider<TransactionRepo>((ref) {
+  ref.watch(hiveReadyProvider);
+  final box = Hive.box<BBTransaction>(Boxes.transactions);
+  return TransactionRepo(box);
+});
+
+final transactionsProvider = StreamProvider<List<BBTransaction>>((ref) {
   final repo = ref.watch(transactionRepoProvider);
   return repo.watchAll();
 });
 
-final budgetsRepoProvider = budgetRepoProvider;
-final goalsRepoProvider = goalRepoProvider;
+final monthSpendProvider = Provider<int>((ref) {
+  ref.watch(transactionsProvider);
+  final repo = ref.watch(transactionRepoProvider);
+  return repo.totalSpentThisMonthCents(DateTime.now().toUtc());
+});
