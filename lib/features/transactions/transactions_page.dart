@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/providers.dart';
-import 'add_transaction_sheet.dart';
-import '../receipt_scan/receipt_flow.dart';
 import '../../core/utils/currency.dart';
+import 'add_transaction_sheet.dart';
 
 class TransactionsPage extends ConsumerWidget {
   const TransactionsPage({super.key});
@@ -13,33 +12,26 @@ class TransactionsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(transactionsProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transactions'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.camera_alt),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ReceiptFlow()),
+      appBar: AppBar(title: const Text('Transactions')),
+      body: transactions.when(
+        data: (items) {
+          if (items.isEmpty) {
+            return const Center(child: Text('No transactions yet'));
+          }
+          return ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final tx = items[index];
+              return ListTile(
+                title: Text(tx.merchant),
+                subtitle: Text(tx.category),
+                trailing: Text(formatCents(tx.amountCents)),
               );
             },
-          ),
-        ],
-      ),
-      body: transactions.when(
-        data: (items) => ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final tx = items[index];
-            return ListTile(
-              title: Text(tx.merchant ?? 'Unknown'),
-              subtitle: Text(tx.note ?? ''),
-              trailing: Text(formatCents(tx.amountCents)),
-            );
-          },
-        ),
+          );
+        },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text('Error: $e')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

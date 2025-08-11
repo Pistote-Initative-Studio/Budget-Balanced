@@ -1,36 +1,55 @@
 import 'package:hive/hive.dart';
 
-
-@HiveType(typeId: 0)
-class Transaction extends HiveObject {
-  Transaction({
+/// Represents a manual transaction within the app.
+class BBTransaction {
+  BBTransaction({
     required this.id,
     required this.amountCents,
     required this.dateUtc,
-    this.merchant,
-    this.category,
-    this.paymentType,
-    this.note,
-    this.source,
-    this.attachmentId,
+    required this.merchant,
+    required this.category,
+    required this.paymentType,
+    required this.note,
   });
 
-  @HiveField(0)
-  String id;
-  @HiveField(1)
-  int amountCents;
-  @HiveField(2)
-  DateTime dateUtc;
-  @HiveField(3)
-  String? merchant;
-  @HiveField(4)
-  String? category;
-  @HiveField(5)
-  String? paymentType;
-  @HiveField(6)
-  String? note;
-  @HiveField(7)
-  String? source;
-  @HiveField(8)
-  String? attachmentId;
+  final String id;
+  final int amountCents;
+  final DateTime dateUtc;
+  final String merchant;
+  final String category;
+  final String paymentType;
+  final String note;
+}
+
+class BBTransactionAdapter extends TypeAdapter<BBTransaction> {
+  @override
+  final int typeId = 1;
+
+  @override
+  BBTransaction read(BinaryReader reader) {
+    return BBTransaction(
+      id: reader.readString(),
+      amountCents: reader.readInt(),
+      dateUtc: DateTime.fromMillisecondsSinceEpoch(
+        reader.readInt(),
+        isUtc: true,
+      ),
+      merchant: reader.readString(),
+      category: reader.readString(),
+      paymentType: reader.readString(),
+      note: reader.readString(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, BBTransaction obj) {
+    writer
+      ..writeString(obj.id)
+      ..writeInt(obj.amountCents)
+      ..writeInt(obj.dateUtc.millisecondsSinceEpoch)
+      ..writeString(obj.merchant)
+      ..writeString(obj.category)
+      ..writeString(obj.paymentType)
+      ..writeString(obj.note);
+  }
 }

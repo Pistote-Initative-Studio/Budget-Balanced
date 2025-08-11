@@ -1,18 +1,16 @@
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../models/transaction.dart';
-import '../models/budget.dart';
-import '../models/goal.dart';
-import '../models/attachment.dart';
 
-const transactionsBox = 'transactions';
-const budgetsBox = 'budgets';
-const goalsBox = 'goals';
-const attachmentsBox = 'attachments';
+class Boxes {
+  Boxes._();
+  static const transactions = 'bb_transactions';
+}
 
-Future<void> openHiveBoxes() async {
-  await Hive.openBox<Transaction>(transactionsBox);
-  await Hive.openBox<Budget>(budgetsBox);
-  await Hive.openBox<Goal>(goalsBox);
-  await Hive.openBox<Attachment>(attachmentsBox);
+Future<void> initHive() async {
+  await Hive.initFlutter();
+  if (!Hive.isAdapterRegistered(BBTransactionAdapter().typeId)) {
+    Hive.registerAdapter(BBTransactionAdapter());
+  }
+  await Hive.openBox<BBTransaction>(Boxes.transactions);
 }

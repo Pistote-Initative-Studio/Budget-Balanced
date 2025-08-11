@@ -1,20 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../widgets/chart_spend_vs_budget.dart';
+import '../../core/di/providers.dart';
+import '../../core/utils/currency.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final total = ref.watch(monthSpendProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
-          Text('This Month Spend'),
-          SizedBox(height: 16),
-          ChartSpendVsBudget(),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('This Month Spend'),
+                  const SizedBox(height: 8),
+                  Text(
+                    formatCents(total),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
