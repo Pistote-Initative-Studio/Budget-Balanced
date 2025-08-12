@@ -22,10 +22,25 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
   String _category = 'General';
   String _paymentType = 'Card';
-  DateTime _date = DateTime.now().toUtc();
+  late DateTime _date;
 
   final _uuid = const Uuid();
-  final _dateFormat = DateFormat.yMMMd();
+  final _dateFormat = DateFormat('yyyy-MM-dd');
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now().toUtc();
+    _date = DateTime.utc(now.year, now.month, now.day);
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _merchantController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +71,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   DropdownMenuItem(value: 'General', child: Text('General')),
                   DropdownMenuItem(value: 'Food', child: Text('Food')),
                   DropdownMenuItem(value: 'Transport', child: Text('Transport')),
+                  DropdownMenuItem(value: 'Bills', child: Text('Bills')),
                   DropdownMenuItem(value: 'Shopping', child: Text('Shopping')),
                 ],
                 onChanged: (v) => setState(() => _category = v ?? 'General'),
@@ -66,7 +82,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 items: const [
                   DropdownMenuItem(value: 'Card', child: Text('Card')),
                   DropdownMenuItem(value: 'Cash', child: Text('Cash')),
-                  DropdownMenuItem(value: 'Online', child: Text('Online')),
+                  DropdownMenuItem(value: 'Other', child: Text('Other')),
                 ],
                 onChanged: (v) => setState(() => _paymentType = v ?? 'Card'),
               ),
@@ -84,7 +100,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                     lastDate: DateTime(2100),
                   );
                   if (picked != null) {
-                    setState(() => _date = picked.toUtc());
+                    setState(() =>
+                        _date = DateTime.utc(picked.year, picked.month, picked.day));
                   }
                 },
               ),

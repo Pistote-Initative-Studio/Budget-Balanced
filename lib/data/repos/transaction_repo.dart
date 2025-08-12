@@ -1,7 +1,6 @@
 import 'package:hive/hive.dart';
 
 import '../models/transaction.dart';
-import '../storage/hive_boxes.dart';
 
 class TransactionRepo {
   TransactionRepo(this._box);

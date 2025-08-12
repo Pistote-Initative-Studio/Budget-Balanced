@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/providers.dart';
 import '../../core/utils/currency.dart';
+import 'package:intl/intl.dart';
 import 'add_transaction_sheet.dart';
 
 class TransactionsPage extends ConsumerWidget {
@@ -18,13 +19,14 @@ class TransactionsPage extends ConsumerWidget {
           if (items.isEmpty) {
             return const Center(child: Text('No transactions yet'));
           }
+          final dateFormat = DateFormat('yyyy-MM-dd');
           return ListView.builder(
             itemCount: items.length,
             itemBuilder: (context, index) {
               final tx = items[index];
               return ListTile(
                 title: Text(tx.merchant),
-                subtitle: Text(tx.category),
+                subtitle: Text(dateFormat.format(tx.dateUtc.toLocal())),
                 trailing: Text(formatCents(tx.amountCents)),
               );
             },
