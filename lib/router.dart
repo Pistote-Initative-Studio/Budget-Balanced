@@ -15,11 +15,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => _ScaffoldWithNav(child: child),
         routes: [
-          GoRoute(path: '/', builder: (context, state) => const DashboardPage()),
-          GoRoute(path: '/transactions', builder: (context, state) => const TransactionsPage()),
-          GoRoute(path: '/budgets', builder: (context, state) => const BudgetsPage()),
-          GoRoute(path: '/goals', builder: (context, state) => const GoalsPage()),
-          GoRoute(path: '/settings', builder: (context, state) => const SettingsPage()),
+          GoRoute(
+              path: '/', builder: (context, state) => const DashboardPage()),
+          GoRoute(
+              path: '/transactions',
+              builder: (context, state) => const TransactionsPage()),
+          GoRoute(
+              path: '/budgets',
+              builder: (context, state) => const BudgetsPage()),
+          GoRoute(
+              path: '/goals', builder: (context, state) => const GoalsPage()),
+          GoRoute(
+              path: '/settings',
+              builder: (context, state) => const SettingsPage()),
         ],
       ),
     ],
@@ -69,7 +77,7 @@ class _ScaffoldWithNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final location = GoRouter.of(context).location;
+    final location = GoRouterState.of(context).uri.toString();
     final currentIndex = _locationToIndex(location);
     return Scaffold(
       body: child,
@@ -77,11 +85,15 @@ class _ScaffoldWithNav extends StatelessWidget {
         currentIndex: currentIndex,
         onTap: (index) => _onItemTapped(context, index),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Transactions'),
-          BottomNavigationBarItem(icon: Icon(Icons.pie_chart), label: 'Budgets'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.list), label: 'Transactions'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.pie_chart), label: 'Budgets'),
           BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Goals'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
     );
