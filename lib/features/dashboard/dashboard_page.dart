@@ -9,13 +9,7 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final overview = ref.watch(budgetOverviewProvider);
-    final totalLimit = overview.totalLimit;
-    final totalSpent = overview.totalSpent;
-    final pct = overview.pctUsed;
-    final double progress = totalLimit == 0
-        ? 0.0
-        : (totalSpent / totalLimit).clamp(0.0, 1.0).toDouble();
+    final spent = ref.watch(monthSpendProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
       body: ListView(
@@ -29,14 +23,7 @@ class DashboardPage extends ConsumerWidget {
                 children: [
                   const Text('Budget This Month'),
                   const SizedBox(height: 8),
-                  if (totalLimit == 0)
-                    const Text('No budget set')
-                  else ...[
-                    Text(
-                        '${formatCents(totalSpent)} / ${formatCents(totalLimit)} • ${pct.toStringAsFixed(0)}%'),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(value: progress),
-                  ],
+                  Text(formatCents(spent)),
                 ],
               ),
             ),

@@ -4,9 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import 'features/dashboard/dashboard_page.dart';
 import 'features/transactions/transactions_page.dart';
-import 'features/budgets/budgets_page.dart';
-import 'features/goals/goals_page.dart';
-import 'features/settings/settings_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -20,14 +17,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
               path: '/transactions',
               builder: (context, state) => const TransactionsPage()),
-          GoRoute(
-              path: '/budgets',
-              builder: (context, state) => const BudgetsPage()),
-          GoRoute(
-              path: '/goals', builder: (context, state) => const GoalsPage()),
-          GoRoute(
-              path: '/settings',
-              builder: (context, state) => const SettingsPage()),
         ],
       ),
     ],
@@ -44,12 +33,6 @@ class _ScaffoldWithNav extends StatelessWidget {
         return 0;
       case '/transactions':
         return 1;
-      case '/budgets':
-        return 2;
-      case '/goals':
-        return 3;
-      case '/settings':
-        return 4;
       default:
         return 0;
     }
@@ -62,15 +45,6 @@ class _ScaffoldWithNav extends StatelessWidget {
         break;
       case 1:
         context.go('/transactions');
-        break;
-      case 2:
-        context.go('/budgets');
-        break;
-      case 3:
-        context.go('/goals');
-        break;
-      case 4:
-        context.go('/settings');
         break;
     }
   }
@@ -89,11 +63,6 @@ class _ScaffoldWithNav extends StatelessWidget {
               icon: Icon(Icons.dashboard), label: 'Dashboard'),
           BottomNavigationBarItem(
               icon: Icon(Icons.list), label: 'Transactions'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.pie_chart), label: 'Budgets'),
-          BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Goals'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
     );
