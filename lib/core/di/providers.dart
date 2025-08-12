@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
@@ -44,20 +42,35 @@ final currentMonthBudgetProvider =
 
 /// Spend totals
 final totalSpentThisMonthProvider = Provider<int>((ref) {
-  ref.watch(transactionsProvider);
-  final repo = ref.watch(transactionRepoProvider);
-  return repo.totalSpentThisMonthCents(DateTime.now().toUtc());
+  final txs = ref
+      .watch(transactionsProvider)
+      .maybeWhen(data: (v) => v, orElse: () => const <BBTransaction>[]);
+  final now = DateTime.now().toUtc();
+  final start = DateTime.utc(now.year, now.month, 1);
+  final end = DateTime.utc(now.year, now.month + 1, 1);
+  return txs
+      .where((t) =>
+          t.dateUtc.isAfter(start.subtract(const Duration(milliseconds: 1))) &&
+          t.dateUtc.isBefore(end))
+      .fold<int>(0, (sum, t) => sum + t.amountCents);
 });
 
 /// Category spend map
 final categorySpendThisMonthProvider = Provider<Map<String, int>>((ref) {
-  final txs =
-      ref.watch(transactionsProvider).maybeWhen(data: (v) => v, orElse: () => const []);
-  final (year, month) = ref.watch(currentMonthProvider);
+  final txs = ref
+      .watch(transactionsProvider)
+      .maybeWhen(data: (v) => v, orElse: () => const <BBTransaction>[]);
+  final now = DateTime.now().toUtc();
+  final start = DateTime.utc(now.year, now.month, 1);
+  final end = DateTime.utc(now.year, now.month + 1, 1);
+
   final map = <String, int>{};
   for (final tx in txs) {
-    if (tx.dateUtc.year == year && tx.dateUtc.month == month) {
-      map[tx.category] = (map[tx.category] ?? 0) + tx.amountCents;
+    final d = tx.dateUtc;
+    if (d.isAfter(start.subtract(const Duration(milliseconds: 1))) &&
+        d.isBefore(end)) {
+      map.update(tx.category, (v) => v + tx.amountCents,
+          ifAbsent: () => tx.amountCents);
     }
   }
   return map;
@@ -96,8 +109,8 @@ final budgetOverviewProvider = Provider<BudgetOverview>((ref) {
     final spent = spend[c] ?? 0;
     categories[c] = BudgetCategoryOverview(limit: limit, spent: spent);
   }
-  final totalLimit = limits.values.fold(0, (s, v) => s + v);
-  final totalSpent = spend.values.fold(0, (s, v) => s + v);
+  final totalLimit = limits.values.fold<int>(0, (s, v) => s + v);
+  final totalSpent = spend.values.fold<int>(0, (s, v) => s + v);
   return BudgetOverview(
     categories: categories,
     totalLimit: totalLimit,
@@ -107,20 +120,22 @@ final budgetOverviewProvider = Provider<BudgetOverview>((ref) {
 
 /// Totals for dashboard header
 final totalBudgetThisMonthProvider = Provider<int>((ref) {
-  final overview = ref.watch(budgetOverviewProvider);
-  return overview.totalLimit;
-});
-
-final savedThisMonthProvider = Provider<int>((ref) {
-  final totalBudget = ref.watch(totalBudgetThisMonthProvider);
-  final totalSpent = ref.watch(totalSpentThisMonthProvider);
-  return max(totalBudget - totalSpent, 0);
+  final b = ref
+      .watch(currentMonthBudgetProvider)
+      .maybeWhen(data: (v) => v, orElse: () => null);
+  if (b == null) return 0;
+  return b.categoryLimits.values.fold<int>(0, (sum, v) => sum + v);
 });
 
 final remainingThisMonthProvider = Provider<int>((ref) {
-  final totalBudget = ref.watch(totalBudgetThisMonthProvider);
-  final totalSpent = ref.watch(totalSpentThisMonthProvider);
-  return totalBudget - totalSpent;
+  final budget = ref.watch(totalBudgetThisMonthProvider);
+  final spent = ref.watch(totalSpentThisMonthProvider);
+  return budget - spent;
+});
+
+final savedThisMonthProvider = Provider<int>((ref) {
+  final remaining = ref.watch(remainingThisMonthProvider);
+  return remaining > 0 ? remaining : 0;
 });
 
 // Backwards compatibility
