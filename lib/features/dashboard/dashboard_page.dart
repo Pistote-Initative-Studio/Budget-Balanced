@@ -9,7 +9,12 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final total = ref.watch(monthSpendProvider);
+    final overview = ref.watch(budgetOverviewProvider);
+    final totalLimit = overview.totalLimit;
+    final totalSpent = overview.totalSpent;
+    final pct = overview.pctUsed;
+    final progress =
+        totalLimit == 0 ? 0.0 : (totalSpent / totalLimit).clamp(0, 1);
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
       body: ListView(
@@ -21,12 +26,16 @@ class DashboardPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('This Month Spend'),
+                  const Text('Budget This Month'),
                   const SizedBox(height: 8),
-                  Text(
-                    formatCents(total),
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
+                  if (totalLimit == 0)
+                    const Text('No budget set')
+                  else ...[
+                    Text(
+                      '${formatCents(totalSpent)} / ${formatCents(totalLimit)} • ${pct.toStringAsFixed(0)}%'),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(value: progress),
+                  ],
                 ],
               ),
             ),
